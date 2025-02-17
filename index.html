@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MP3 Player</title>
+<style>
+  body {
+    font-family: sans-serif;
+  }
+  #player {
+    width: 300px;
+    padding: 20px;
+    border: 1px solid #ccc;
+  }
+  button {
+    margin: 5px;
+  }
+</style>
+</head>
+<body>
+<div id="player">
+  <audio id="audio" controls>
+    Your browser does not support the audio element.
+  </audio>
+  <button onclick="playRandom()">Random Play</button>
+  <button onclick="stop()">Stop</button>
+  <button onclick="next()">Next</button>
+  <button onclick="prev()">Previous</button>
+  <button onclick="showAnswer()">Answer</button>
+</div>
+
+<script>
+  const audio = document.getElementById('audio');
+  const mp3Files = [
+    'あなたへ 〜旅立ちに寄せるメッセージ〜.mp3',
+    '証.mp3',
+    '自分らしく.mp3'
+    'Let’s search for Tomorrow.mp3'
+    '手紙～拝啓 十五の君へ～.mp3'
+　　 '地球の詩.mp3'
+    'YELL.mp3'
+    '友 〜旅立ちの時〜.mp3'
+    '空駆ける天馬.mp3'
+    '翼をください.mp3'
+  ]; // MP3ファイルのリスト
+
+  let currentTrack = 0;
+
+  function playRandom() {
+    currentTrack = Math.floor(Math.random() * mp3Files.length);
+    audio.src = mp3Files[currentTrack];
+    audio.play();
+  }
+
+  function stop() {
+    audio.pause();
+  }
+
+  function next() {
+    currentTrack = (currentTrack + 1) % mp3Files.length;
+    audio.src = mp3Files[currentTrack];
+    audio.play();
+  }
+
+  function prev() {
+    currentTrack = (currentTrack - 1 + mp3Files.length) % mp3Files.length;
+    audio.src = mp3Files[currentTrack];
+    audio.play();
+  }
+
+  function showAnswer() {
+    const audioSrc = audio.src;
+    const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1); // ファイル名を取得
+    alert("再生中の曲: " + fileName);
+  }
+</script>
+</body>
+</html>
