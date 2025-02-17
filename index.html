@@ -30,18 +30,26 @@
 
 <script>
   const audio = document.getElementById('audio');
-  const mp3Files = [
-    'あなたへ 〜旅立ちに寄せるメッセージ〜.mp3',
-    '証.mp3',
-    '自分らしく.mp3'
-    'Let’s search for Tomorrow.mp3'
-    '手紙～拝啓 十五の君へ～.mp3'
-　　 '地球の詩.mp3'
-    'YELL.mp3'
-    '友 〜旅立ちの時〜.mp3'
-    '空駆ける天馬.mp3'
-    '翼をください.mp3'
-  ]; // MP3ファイルのリスト
+  let mp3Files = []; // MP3ファイルのリスト
+
+  // HTMLファイルと同じディレクトリにあるMP3ファイルを読み込む
+  fetch('./') // 現在のディレクトリを指定
+    .then(response => response.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const links = doc.querySelectorAll('a'); // すべてのリンクを取得
+
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href.endsWith('.mp3')) { // MP3ファイルかどうかを確認
+          mp3Files.push(href);
+        }
+      });
+
+      // MP3ファイルが読み込まれたら、ランダム再生を開始
+      playRandom();
+    });
 
   let currentTrack = 0;
 
