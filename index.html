@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>MP3 Player</title>
+<title>ZIP MP3 Player</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   body {
     font-family: sans-serif;
@@ -18,68 +19,57 @@
 </head>
 <body>
 <div id="player">
-  <audio id="audio" controls>
-    Your browser does not support the audio element.
-  </audio>
-  <button onclick="playRandom()">Random Play</button>
-  <button onclick="stop()">Stop</button>
-  <button onclick="next()">Next</button>
-  <button onclick="prev()">Previous</button>
-  <button onclick="showAnswer()">Answer</button>
+  <input type="file" id="zipFileInput" accept=".zip">
+  <audio id="audio" controls></audio>
+  <div id="currentTrackName"></div>
 </div>
 
 <script>
+  const zipFileInput = document.getElementById('zipFileInput');
   const audio = document.getElementById('audio');
-  let mp3Files = []; // MP3ファイルのリスト
+  const currentTrackName = document.getElementById('currentTrackName');
+  let zip;
+  let mp3Files = [];
 
-  // HTMLファイルと同じディレクトリにあるMP3ファイルを読み込む
-  fetch('./') // 現在のディレクトリを指定
-    .then(response => response.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const links = doc.querySelectorAll('a'); // すべてのリンクを取得
+  zipFileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
 
-      links.forEach(link => {
-        const href = link.getAttribute('href');
-        if (href.endsWith('.mp3')) { // MP3ファイルかどうかを確認
-          mp3Files.push(href);
+    JSZip.loadAsync(file).then(function(loadedZip) {
+      zip = loadedZip;
+      mp3Files = [];
+
+      zip.forEach(function (relativePath, zipEntry) {
+        if (zipEntry.name.endsWith('.mp3')) {
+          mp3Files.push(zipEntry);
         }
       });
 
-      // MP3ファイルが読み込まれたら、ランダム再生を開始
-      playRandom();
+      if (mp3Files.length > 0) {
+        playRandomTrack();
+      } else {
+        alert('ZIPファイルにMP3ファイルが含まれていません。');
+      }
     });
+  });
 
-  let currentTrack = 0;
+  function playRandomTrack() {
+    if (mp3Files.length === 0) return;
 
-  function playRandom() {
-    currentTrack = Math.floor(Math.random() * mp3Files.length);
-    audio.src = mp3Files[currentTrack];
-    audio.play();
+    const randomIndex = Math.floor(Math.random() * mp3Files.length);
+    const randomTrack = mp3Files[randomIndex];
+
+    randomTrack.async("blob").then(function(blob) {
+      const audioUrl = URL.createObjectURL(blob);
+      audio.src = audioUrl;
+      audio.play();
+      currentTrackName.textContent = randomTrack.name;
+    });
   }
 
-  function stop() {
-    audio.pause();
-  }
-
-  function next() {
-    currentTrack = (currentTrack + 1) % mp3Files.length;
-    audio.src = mp3Files[currentTrack];
-    audio.play();
-  }
-
-  function prev() {
-    currentTrack = (currentTrack - 1 + mp3Files.length) % mp3Files.length;
-    audio.src = mp3Files[currentTrack];
-    audio.play();
-  }
-
-  function showAnswer() {
-    const audioSrc = audio.src;
-    const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1); // ファイル名を取得
-    alert("再生中の曲: " + fileName);
-  }
+  audio.addEventListener('ended', () => {
+    playRandomTrack();
+  });
 </script>
+
 </body>
 </html>
