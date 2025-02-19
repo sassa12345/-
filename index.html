@@ -3,6 +3,7 @@
 <head>
 <title>ZIP MP3 Player</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatag/3.0.2/jsmediatag.min.js"></script>
 <style>
 body {
   font-family: sans-serif;
@@ -51,6 +52,7 @@ button:hover {
   text-align: center;
   font-weight: bold;
   margin-top: 10px;
+  display: none; /* 初期状態は非表示 */
 }
 </style>
 </head>
@@ -67,9 +69,8 @@ button:hover {
     <button id="firstButton">最初から</button>
     <button id="answerButton">答え</button>
   </div>
-  <div id="currentTrackName" style="display: none;"></div>
-
-  </div>
+  <div id="currentTrackName"></div>
+</div>
 
 <script>
   const zipFileInput = document.getElementById('zipFileInput');
@@ -77,7 +78,7 @@ button:hover {
   const currentTrackName = document.getElementById('currentTrackName');
   let zip;
   let mp3Files = [];
-  let currentTrack = 0; // 現在の曲のインデックス
+  let currentTrack = 0;
 
   zipFileInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
@@ -103,13 +104,23 @@ button:hover {
   function playRandomTrack() {
     if (mp3Files.length === 0) return;
 
-    const randomTrack = mp3Files[currentTrack]; // 現在の曲を再生
+    const randomTrack = mp3Files[currentTrack];
 
     randomTrack.async("blob").then(function(blob) {
       const audioUrl = URL.createObjectURL(blob);
       audio.src = audioUrl;
       audio.play();
-      currentTrackName.textContent = randomTrack.name;
+
+      jsmediatag.read(blob, {
+        onSuccess: function(tag) {
+          const title = tag.tags.title || randomTrack.name;
+          currentTrackName.textContent = title;
+        },
+        onError: function(error) {
+          console.error("ID3タグ読み込みエラー:", error);
+          currentTrackName.textContent = randomTrack.name;
+        }
+      });
     });
   }
 
@@ -144,16 +155,12 @@ button:hover {
     audio.currentTime = 0;
   }
 
-  // ... (その他のコード)
-
-function showAnswer() {
-  const audioSrc = audio.src;
-  const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1);
-  currentTrackName.textContent = fileName;
-  currentTrackName.style.display = "block"; // ファイル名を表示
-}
-
-// ... (その他のコード)
+  function showAnswer() {
+    const audioSrc = audio.src;
+    const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1);
+    currentTrackName.textContent = fileName;
+    currentTrackName.style.display = "block"; // ファイル名を表示
+  }
 
   // イベントリスナー
   nextButton.addEventListener('click', playNextTrack);
@@ -164,7 +171,7 @@ function showAnswer() {
   answerButton.addEventListener('click', showAnswer);
 
   audio.addEventListener('ended', () => {
-    playNextTrack(); // 自動的に次の曲を再生
+    playNextTrack();
   });
 </script>
 
