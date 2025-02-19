@@ -4,23 +4,69 @@
 <title>ZIP MP3 Player</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-  body {
-    font-family: sans-serif;
-  }
-  #player {
-    width: 300px;
-    padding: 20px;
-    border: 1px solid #ccc;
-  }
-  button {
-    margin: 5px;
-  }
+body {
+  font-family: sans-serif;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+#player {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  width: 400px;
+}
+
+audio {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#currentTrackName {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
+}
 </style>
 </head>
 <body>
+
 <div id="player">
   <input type="file" id="zipFileInput" accept=".zip">
   <audio id="audio" controls></audio>
+  <div class="controls">
+    <button id="prevButton">前の曲</button>
+    <button id="nextButton">次の曲</button>
+    <button id="rewindButton">10秒前</button>
+    <button id="forwardButton">10秒先</button>
+    <button id="firstButton">最初から</button>
+    <button id="answerButton">答え</button>
+  </div>
   <div id="currentTrackName"></div>
 </div>
 
@@ -30,6 +76,7 @@
   const currentTrackName = document.getElementById('currentTrackName');
   let zip;
   let mp3Files = [];
+  let currentTrack = 0; // 現在の曲のインデックス
 
   zipFileInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
@@ -55,8 +102,7 @@
   function playRandomTrack() {
     if (mp3Files.length === 0) return;
 
-    const randomIndex = Math.floor(Math.random() * mp3Files.length);
-    const randomTrack = mp3Files[randomIndex];
+    const randomTrack = mp3Files[currentTrack]; // 現在の曲を再生
 
     randomTrack.async("blob").then(function(blob) {
       const audioUrl = URL.createObjectURL(blob);
@@ -66,8 +112,53 @@
     });
   }
 
-  audio.addEventListener('ended', () => {
+  // ボタンの要素を取得
+  const prevButton = document.getElementById('prevButton');
+  const nextButton = document.getElementById('nextButton');
+  const rewindButton = document.getElementById('rewindButton');
+  const forwardButton = document.getElementById('forwardButton');
+  const firstButton = document.getElementById('firstButton');
+  const answerButton = document.getElementById('answerButton');
+
+  // 再生制御関数
+  function playNextTrack() {
+    currentTrack = (currentTrack + 1) % mp3Files.length;
     playRandomTrack();
+  }
+
+  function playPreviousTrack() {
+    currentTrack = (currentTrack - 1 + mp3Files.length) % mp3Files.length;
+    playRandomTrack();
+  }
+
+  function rewind10Seconds() {
+    audio.currentTime -= 10;
+  }
+
+  function forward10Seconds() {
+    audio.currentTime += 10;
+  }
+
+  function playFromStart() {
+    audio.currentTime = 0;
+  }
+
+  function showAnswer() {
+    const audioSrc = audio.src;
+    const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1);
+    alert("再生中の曲: " + fileName);
+  }
+
+  // イベントリスナー
+  nextButton.addEventListener('click', playNextTrack);
+  prevButton.addEventListener('click', playPreviousTrack);
+  rewindButton.addEventListener('click', rewind10Seconds);
+  forwardButton.addEventListener('click', forward10Seconds);
+  firstButton.addEventListener('click', playFromStart);
+  answerButton.addEventListener('click', showAnswer);
+
+  audio.addEventListener('ended', () => {
+    playNextTrack(); // 自動的に次の曲を再生
   });
 </script>
 
