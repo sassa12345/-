@@ -71,7 +71,8 @@ button:hover {
   <div id="currentTrackName"></div>
 </div>
 
-<script>
+
+  <script>
   const zipFileInput = document.getElementById('zipFileInput');
   const audio = document.getElementById('audio');
   const currentTrackName = document.getElementById('currentTrackName');
@@ -153,7 +154,7 @@ button:hover {
 
   function showAnswer() {
     const audioSrc = audio.src;
-    const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1);
+    const fileName = mp3Files[currentTrack].name;
     currentTrackName.textContent = fileName;
     currentTrackName.style.display = "block"; // ファイル名を表示
   }
@@ -169,7 +170,8 @@ button:hover {
   audio.addEventListener('ended', () => {
     playNextTrack();
   });
-</script>
+  </script>
 
+  audio.addEventListener('ended', () => {
 </body>
 </html>
