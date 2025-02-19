@@ -113,8 +113,12 @@ button:hover {
 
       jsmediatag.read(blob, {
         onSuccess: function(tag) {
-          const title = tag.tags.title || randomTrack.name;
-          currentTrackName.textContent = title;
+          const title = tag.tags.title;
+          if (title) {
+            currentTrackName.textContent = title;
+          } else {
+            currentTrackName.textContent = randomTrack.name;
+          }
         },
         onError: function(error) {
           console.error("ID3タグ読み込みエラー:", error);
