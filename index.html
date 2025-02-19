@@ -51,6 +51,7 @@ button:hover {
   text-align: center;
   font-weight: bold;
   margin-top: 10px;
+  display: none; /* 初期状態は非表示 */
 }
 </style>
 </head>
@@ -102,7 +103,9 @@ button:hover {
   function playRandomTrack() {
     if (mp3Files.length === 0) return;
 
-    const randomTrack = mp3Files[currentTrack];
+    // ランダムなインデックスを生成
+    const randomIndex = Math.floor(Math.random() * mp3Files.length);
+    const randomTrack = mp3Files[randomIndex];
 
     randomTrack.async("blob").then(function(blob) {
       const audioUrl = URL.createObjectURL(blob);
@@ -127,11 +130,13 @@ button:hover {
   function playNextTrack() {
     currentTrack = (currentTrack + 1) % mp3Files.length;
     playRandomTrack();
+    currentTrackName.style.display = "none"; // 次の曲で非表示にする
   }
 
   function playPreviousTrack() {
     currentTrack = (currentTrack - 1 + mp3Files.length) % mp3Files.length;
     playRandomTrack();
+    currentTrackName.style.display = "none"; // 前の曲で非表示にする
   }
 
   function rewind10Seconds() {
@@ -149,7 +154,8 @@ button:hover {
   function showAnswer() {
     const audioSrc = audio.src;
     const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1);
-    alert("再生中の曲: " + fileName);
+    currentTrackName.textContent = fileName;
+    currentTrackName.style.display = "block"; // ファイル名を表示
   }
 
   // イベントリスナー
