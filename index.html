@@ -71,13 +71,13 @@ button:hover {
   <div id="currentTrackName"></div>
 </div>
 
-
-  <script>
+<script>
   const zipFileInput = document.getElementById('zipFileInput');
   const audio = document.getElementById('audio');
   const currentTrackName = document.getElementById('currentTrackName');
   let zip;
   let mp3Files = [];
+  let playedTracks = new Set();
   let currentTrack = 0;
 
   zipFileInput.addEventListener('change', (event) => {
@@ -86,6 +86,7 @@ button:hover {
     JSZip.loadAsync(file).then(function(loadedZip) {
       zip = loadedZip;
       mp3Files = [];
+      playedTracks.clear(); // 再生済みトラックをクリア
 
       zip.forEach(function (relativePath, zipEntry) {
         if (zipEntry.name.endsWith('.mp3')) {
@@ -104,9 +105,13 @@ button:hover {
   function playRandomTrack() {
     if (mp3Files.length === 0) return;
 
-    // ランダムなインデックスを生成
-    const randomIndex = Math.floor(Math.random() * mp3Files.length);
+    let randomIndex;
+    do {
+      randomIndex = Math.floor(Math.random() * mp3Files.length);
+    } while (playedTracks.has(randomIndex) && playedTracks.size < mp3Files.length);
+
     const randomTrack = mp3Files[randomIndex];
+    playedTracks.add(randomIndex);
 
     randomTrack.async("blob").then(function(blob) {
       const audioUrl = URL.createObjectURL(blob);
@@ -154,7 +159,7 @@ button:hover {
 
   function showAnswer() {
     const audioSrc = audio.src;
-    const fileName = mp3Files[currentTrack].name;
+    const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1);
     currentTrackName.textContent = fileName;
     currentTrackName.style.display = "block"; // ファイル名を表示
   }
@@ -170,8 +175,7 @@ button:hover {
   audio.addEventListener('ended', () => {
     playNextTrack();
   });
-  </script>
+</script>
 
-  audio.addEventListener('ended', () => {
 </body>
 </html>
