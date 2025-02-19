@@ -3,7 +3,6 @@
 <head>
 <title>ZIP MP3 Player</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatag/3.0.2/jsmediatag.min.js"></script>
 <style>
 body {
   font-family: sans-serif;
@@ -52,7 +51,6 @@ button:hover {
   text-align: center;
   font-weight: bold;
   margin-top: 10px;
-  display: none; /* 初期状態は非表示 */
 }
 </style>
 </head>
@@ -78,7 +76,7 @@ button:hover {
   const currentTrackName = document.getElementById('currentTrackName');
   let zip;
   let mp3Files = [];
-  let currentTrack = 0;
+  let currentTrack = 0; // 現在の曲のインデックス
 
   zipFileInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
@@ -104,27 +102,13 @@ button:hover {
   function playRandomTrack() {
     if (mp3Files.length === 0) return;
 
-    const randomTrack = mp3Files[currentTrack];
+    const randomTrack = mp3Files[currentTrack]; // 現在の曲を再生
 
     randomTrack.async("blob").then(function(blob) {
       const audioUrl = URL.createObjectURL(blob);
       audio.src = audioUrl;
       audio.play();
-
-      jsmediatag.read(blob, {
-        onSuccess: function(tag) {
-          const title = tag.tags.title;
-          if (title) {
-            currentTrackName.textContent = title;
-          } else {
-            currentTrackName.textContent = randomTrack.name;
-          }
-        },
-        onError: function(error) {
-          console.error("ID3タグ読み込みエラー:", error);
-          currentTrackName.textContent = randomTrack.name;
-        }
-      });
+      currentTrackName.textContent = randomTrack.name;
     });
   }
 
@@ -162,8 +146,7 @@ button:hover {
   function showAnswer() {
     const audioSrc = audio.src;
     const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1);
-    currentTrackName.textContent = fileName;
-    currentTrackName.style.display = "block"; // ファイル名を表示
+    alert("再生中の曲: " + fileName);
   }
 
   // イベントリスナー
@@ -175,7 +158,7 @@ button:hover {
   answerButton.addEventListener('click', showAnswer);
 
   audio.addEventListener('ended', () => {
-    playNextTrack();
+    playNextTrack(); // 自動的に次の曲を再生
   });
 </script>
 
