@@ -67,7 +67,8 @@ button:hover {
     <button id="firstButton">最初から</button>
     <button id="answerButton">答え</button>
   </div>
-  <div id="currentTrackName"></div>
+  <div id="currentTrackName" style="display: none;"></div>
+
 </div>
 
 <script>
@@ -143,11 +144,13 @@ button:hover {
     audio.currentTime = 0;
   }
 
+
   function showAnswer() {
     const audioSrc = audio.src;
     const fileName = audioSrc.substring(audioSrc.lastIndexOf('/') + 1);
-    alert("再生中の曲: " + fileName);
-  }
+    currentTrackName.textContent = fileName;
+    currentTrackName.style.display = "block"; // ファイル名を表示
+}
 
   // イベントリスナー
   nextButton.addEventListener('click', playNextTrack);
